@@ -1,18 +1,12 @@
 name: Check autosquash commits
 description: Fails when a pull request contains fixup!, squash!, or amend! commits.
 
-inputs:
-  github-token:
-    description: GitHub token used to read pull request commits.
-    required: true
-
 runs:
   using: composite
   steps:
     - name: Inspect pull request commits
       uses: actions/github-script@v9
       with:
-        github-token: ${{ inputs.github-token }}
         script: |
           const pullRequest = context.payload.pull_request;
 

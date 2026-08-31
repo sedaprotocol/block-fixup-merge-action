@@ -16,4 +16,4 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Block Fixup/Squash Merge Action
-        uses: ./action.yml
+        uses: ./
