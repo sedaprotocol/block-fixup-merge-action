@@ -30,3 +30,5 @@ jobs:
 The action uses the GitHub API to fetch every commit in the pull request and
 checks each commit subject for `fixup!`, `squash!`, or `amend!`. If it finds
 one, it lists the detected commits and fails the check; otherwise, it passes.
+
+
