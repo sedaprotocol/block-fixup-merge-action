@@ -1,0 +1,19 @@
+name: Git Checks
+
+on: [pull_request]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  block-fixup:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Consumers don't need to checkout the repository
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Block Fixup/Squash Merge Action
+        uses: ./action.yml
