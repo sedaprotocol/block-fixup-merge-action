@@ -1,0 +1,52 @@
+name: Check autosquash commits
+description: Fails when a pull request contains fixup!, squash!, or amend! commits.
+
+runs:
+  using: composite
+  steps:
+    - name: Inspect pull request commits
+      uses: actions/github-script@v9
+      with:
+        script: |
+          const pullRequest = context.payload.pull_request;
+
+          if (!pullRequest) {
+            core.setFailed(
+              "block-fixup-merge-action must be executed from a pull request workflow."
+            );
+            return;
+          }
+
+          const commits = await github.paginate(
+            github.rest.pulls.listCommits,
+            {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pullRequest.number,
+              per_page: 100,
+            }
+          );
+
+          const autosquashPattern = /^(fixup!|squash!|amend!)\s/;
+          const offendingCommits = commits
+            .map((commit) => ({
+              sha: commit.sha.slice(0, 7),
+              subject: (commit.commit.message ?? "").split(/\r?\n/, 1)[0],
+            }))
+            .filter(({ subject }) => autosquashPattern.test(subject));
+
+          if (offendingCommits.length === 0) {
+            core.info("✓ No autosquash commits found");
+            return;
+          }
+
+          core.info("Found autosquash commits:");
+          for (const { sha, subject } of offendingCommits) {
+            const safeSubject = subject.replace(/[\u0000-\u001f\u007f]/g, " ");
+            core.info(`${sha} ${safeSubject}`);
+          }
+
+          core.setFailed(
+            `PR contains ${offendingCommits.length} autosquash commits. ` +
+              "Please autosquash/rebase before merging."
+          );
